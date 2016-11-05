@@ -83,6 +83,7 @@ class DnYaMarketOpinions extends Module
     {
         //хз почему его добавляет перед jquery
         //$this->context->controller->addJS(($this->_path) . 'js/dnyamarketopinions.js');
+        //todo: попробовать сделать вызов до собственных js: $this->context->controller->addJquery();
 
         return '
 			<script type="text/javascript">
