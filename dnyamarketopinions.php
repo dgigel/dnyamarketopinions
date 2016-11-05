@@ -107,7 +107,7 @@ class DnYaMarketOpinions extends Module
 
         $languages = Language::getLanguages();
         foreach ($languages as $lang)
-            $tab->name[$lang['id_lang']] = $this->l($tab_name);
+            $tab->name[$lang['id_lang']] = $this->l($tab_name); // todo: должен передаваться title, а не системное наименовение таба
 
         return $tab->save();
     }
