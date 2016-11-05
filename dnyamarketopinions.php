@@ -48,13 +48,21 @@ class DnYaMarketOpinions extends Module
         && $this->registerHook('BackOfficeHeader');
     }
 
+    /**
+     * @inheritdoc
+     */
     public function uninstall()
     {
         $sql = 'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'dnyamarketopinions`';
+        if (!Db::getInstance()->execute($sql)) {
+            return false;
+        }
 
-        return parent::uninstall()
-        && $this->uninstallModuleTab('AdminDnYaMarketOpinions')
-        && Db::getInstance()->execute($sql);
+        if (!$this->uninstallModuleTab('AdminDnYaMarketOpinions')) {
+            return false;
+        }
+
+        return parent::uninstall();
     }
 
     public function hookDisplayBackOfficeHeader()
