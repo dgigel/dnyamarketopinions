@@ -1,9 +1,12 @@
 <?php
-
 /**
- * DnYaMarketOpinions PrestaShop module main file.
+ * DnYaMarketOpinions: PrestaShop module main file.
+ *
  * @author Daniel Gigel <daniel@gigel.ru>
- * @link http://Daniel.Gigel.ru/
+ * @author zapalm <zapalm@ya.ru>
+ *
+ * @link   http://Daniel.Gigel.ru/
+ *
  * Date: 19.10.2016
  * Time: 13:41
  */
