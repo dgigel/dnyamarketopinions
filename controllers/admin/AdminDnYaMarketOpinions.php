@@ -86,7 +86,7 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                 $rule->highlight = 0;
                 $rule->active = 1;
 
-                $order = new Order((int)$id_order);
+                $order = new Order((int)$id_order); // todo: проверка, что заказ реально существует должна быть проделана заранее
                 $customer = new Customer($order->id_customer);
 
                 if (!$rule->add()) {
