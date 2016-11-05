@@ -70,7 +70,7 @@ class DnYaMarketOpinions extends Module
 			<script type="text/javascript" src="' . ($this->_path) . 'js/dnyamarketopinions.js"></script>';
     }
 
-    public function hookdisplayAdminOrder($params)
+    public function hookDisplayAdminOrder($params)
     {
         $id_opinion = DnYaMarketOpinion::checkOpinion((int)$params['id_order']);
 
