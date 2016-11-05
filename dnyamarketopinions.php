@@ -70,21 +70,31 @@ class DnYaMarketOpinions extends Module
 			<script type="text/javascript" src="' . ($this->_path) . 'js/dnyamarketopinions.js"></script>';
     }
 
+    /**
+     * @param array $params
+     *
+     * @return string
+     */
     public function hookDisplayAdminOrder($params)
     {
-        $id_opinion = DnYaMarketOpinion::checkOpinion((int)$params['id_order']);
+        $opinion = new DnYaMarketOpinion();
+        $rule    = new CartRule();
 
-        if ($id_opinion)
+        $idOrder = (int)$params['id_order'];
+        $id_opinion = DnYaMarketOpinion::checkOpinion($idOrder);
+        if ($id_opinion) {
             $opinion = new DnYaMarketOpinion($id_opinion);
-
-        if ($opinion->id_cart_rule)
-            $rule = new CartRule($opinion->id_cart_rule);
+            if ($opinion->id_cart_rule) {
+                $rule = new CartRule($opinion->id_cart_rule);
+            }
+        }
 
         $this->smarty->assign(array(
-            'id_order' => (int)$params['id_order'],
-            'opinion' => $opinion,
-            'rule' => $rule
+            'id_order' => $idOrder, // todo: не используется
+            'opinion'  => $opinion,
+            'rule'     => $rule
         ));
+
         return $this->display(__FILE__, 'displayAdminOrder.tpl');
     }
 
