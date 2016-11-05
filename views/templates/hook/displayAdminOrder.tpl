@@ -1,4 +1,4 @@
-</br>
+<br/>
 <fieldset>
     <legend>
         <img src="../img/admin/comment.gif">Попросить отзыв на <span style="color:red;">Я</span>ндекс.Маркет
