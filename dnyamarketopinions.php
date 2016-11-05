@@ -31,6 +31,9 @@ class DnYaMarketOpinions extends Module
         $this->description = 'Отправляет e-mail письма клиенту с просьбой оставить отзыв на Яндекс.Маркет за вознаграждение в виде купона.';
     }
 
+    /**
+     * @inheritdoc
+     */
     public function install()
     {
         $sql = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'dnyamarketopinions` (
@@ -39,13 +42,24 @@ class DnYaMarketOpinions extends Module
 			`id_cart_rule` INT UNSIGNED NULL,
 			`date_add` DATETIME NOT NULL,
 	        `date_upd` DATETIME NOT NULL
-			) ENGINE=' . _MYSQL_ENGINE_;
+			) ENGINE=' . _MYSQL_ENGINE_
+        ;
 
-        return parent::install()
-        && Db::getInstance()->execute($sql)
-        && $this->installModuleTab('AdminDnYaMarketOpinions', 'AdminDnYaMarketOpinions', -1)
-        && $this->registerHook('displayAdminOrder')
-        && $this->registerHook('BackOfficeHeader');
+        if (!Db::getInstance()->execute($sql)) {
+            return false;
+        }
+
+        if (!parent::install()) {
+            return false;
+        }
+
+        if (!$this->installModuleTab('AdminDnYaMarketOpinions', 'AdminDnYaMarketOpinions', -1)) { // todo: вторым параметром должен передаваться title, а не системное наименовение таба
+            return false;
+        }
+
+        return $this->registerHook('displayAdminOrder')
+            && $this->registerHook('BackOfficeHeader')
+        ;
     }
 
     /**
