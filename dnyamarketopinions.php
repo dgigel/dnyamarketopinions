@@ -112,14 +112,20 @@ class DnYaMarketOpinions extends Module
         return $tab->save();
     }
 
+    /**
+     * @param string $tab_class
+     *
+     * @return bool
+     */
     private function uninstallModuleTab($tab_class)
     {
         $idTab = Tab::getIdFromClassName($tab_class);
-        if ($idTab != 0) {
+        if ($idTab !== false) {
             $tab = new Tab($idTab);
-            $tab->delete();
-            return true;
+
+            return $tab->delete();
         }
-        return false;
+
+        return true; // Т.к. уже удален или несуществует
     }
 }
