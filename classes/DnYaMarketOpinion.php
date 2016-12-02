@@ -32,6 +32,7 @@ class DnYaMarketOpinion extends ObjectModel
 
     public static function generateVoucherCode()
     {
+        // todo: чем не подходит Tools::passwdGen() ?
         $code = 'YA';
         $symbols = array_merge(range('A', 'Z'), range(0, 9));
         for ($i = 0; $i <= 6; $i++) {

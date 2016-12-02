@@ -10,7 +10,7 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
 {
     public function ajaxProcessAddOpinion()
     {
-        if ($id_order = Tools::getValue('id_order')) {
+        if ($id_order = Tools::getValue('id_order')) { //todo: если id_order не задан, то вернет пусто, хотя ожидается ajax-ответ
             $opinion = new DnYaMarketOpinion();
             $opinion->id_order = (int)$id_order;
             $opinion->opinion_sent = 1;
@@ -50,7 +50,7 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                         null, //file_attachment
                         null, //mode smtp
                         _PS_MODULE_DIR_ . 'dnyamarketopinions/mails/' //template path
-                    );
+                    ); // todo: нет проверки возвращаемого значения; ухо часто - зло
                 }
             }
 
@@ -62,7 +62,7 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
 
     public function ajaxProcessAddRule()
     {
-        if ($id_order = Tools::getValue('id_order')) {
+        if ($id_order = Tools::getValue('id_order')) { //todo: если id_order не задан, то вернет пусто, хотя ожидается ajax-ответ
             $id_opinion = DnYaMarketOpinion::checkOpinion((int)$id_order);
 
             if ($id_opinion) {
@@ -86,7 +86,7 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                 $rule->highlight = 0;
                 $rule->active = 1;
 
-                $order = new Order((int)$id_order);
+                $order = new Order((int)$id_order); // todo: проверка, что заказ реально существует должна быть проделана заранее
                 $customer = new Customer($order->id_customer);
 
                 if (!$rule->add()) {
@@ -124,7 +124,7 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                             null, //file_attachment
                             null, //mode smtp
                             _PS_MODULE_DIR_ . 'dnyamarketopinions/mails/' //template path
-                        );
+                        ); // todo: нет проверки возвращаемого значения; ухо часто - зло
 
                     }
                 }

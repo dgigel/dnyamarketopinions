@@ -1,9 +1,12 @@
 <?php
-
 /**
- * DnYaMarketOpinions PrestaShop module main file.
+ * DnYaMarketOpinions: PrestaShop module main file.
+ *
  * @author Daniel Gigel <daniel@gigel.ru>
- * @link http://Daniel.Gigel.ru/
+ * @author zapalm <zapalm@ya.ru>
+ *
+ * @link   http://Daniel.Gigel.ru/
+ *
  * Date: 19.10.2016
  * Time: 13:41
  */
@@ -31,6 +34,9 @@ class DnYaMarketOpinions extends Module
         $this->description = 'Отправляет e-mail письма клиенту с просьбой оставить отзыв на Яндекс.Маркет за вознаграждение в виде купона.';
     }
 
+    /**
+     * @inheritdoc
+     */
     public function install()
     {
         $sql = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'dnyamarketopinions` (
@@ -39,28 +45,48 @@ class DnYaMarketOpinions extends Module
 			`id_cart_rule` INT UNSIGNED NULL,
 			`date_add` DATETIME NOT NULL,
 	        `date_upd` DATETIME NOT NULL
-			) ENGINE=' . _MYSQL_ENGINE_;
+			) ENGINE=' . _MYSQL_ENGINE_
+        ;
 
-        return parent::install()
-        && Db::getInstance()->execute($sql)
-        && $this->installModuleTab('AdminDnYaMarketOpinions', 'AdminDnYaMarketOpinions', -1)
-        && $this->registerHook('displayAdminOrder')
-        && $this->registerHook('BackOfficeHeader');
+        if (!Db::getInstance()->execute($sql)) {
+            return false;
+        }
+
+        if (!parent::install()) {
+            return false;
+        }
+
+        if (!$this->installModuleTab('AdminDnYaMarketOpinions', 'AdminDnYaMarketOpinions', -1)) { // todo: вторым параметром должен передаваться title, а не системное наименовение таба
+            return false;
+        }
+
+        return $this->registerHook('displayAdminOrder')
+            && $this->registerHook('BackOfficeHeader')
+        ;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function uninstall()
     {
         $sql = 'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'dnyamarketopinions`';
+        if (!Db::getInstance()->execute($sql)) {
+            return false;
+        }
 
-        return parent::uninstall()
-        && $this->uninstallModuleTab('AdminDnYaMarketOpinions')
-        && Db::getInstance()->execute($sql);
+        if (!$this->uninstallModuleTab('AdminDnYaMarketOpinions')) {
+            return false;
+        }
+
+        return parent::uninstall();
     }
 
     public function hookDisplayBackOfficeHeader()
     {
         //хз почему его добавляет перед jquery
         //$this->context->controller->addJS(($this->_path) . 'js/dnyamarketopinions.js');
+        //todo: попробовать сделать вызов до собственных js: $this->context->controller->addJquery();
 
         return '
 			<script type="text/javascript">
@@ -70,21 +96,31 @@ class DnYaMarketOpinions extends Module
 			<script type="text/javascript" src="' . ($this->_path) . 'js/dnyamarketopinions.js"></script>';
     }
 
-    public function hookdisplayAdminOrder($params)
+    /**
+     * @param array $params
+     *
+     * @return string
+     */
+    public function hookDisplayAdminOrder($params)
     {
-        $id_opinion = DnYaMarketOpinion::checkOpinion((int)$params['id_order']);
+        $opinion = new DnYaMarketOpinion();
+        $rule    = new CartRule();
 
-        if ($id_opinion)
+        $idOrder = (int)$params['id_order'];
+        $id_opinion = DnYaMarketOpinion::checkOpinion($idOrder);
+        if ($id_opinion) {
             $opinion = new DnYaMarketOpinion($id_opinion);
-
-        if ($opinion->id_cart_rule)
-            $rule = new CartRule($opinion->id_cart_rule);
+            if ($opinion->id_cart_rule) {
+                $rule = new CartRule($opinion->id_cart_rule);
+            }
+        }
 
         $this->smarty->assign(array(
-            'id_order' => (int)$params['id_order'],
-            'opinion' => $opinion,
-            'rule' => $rule
+            'id_order' => $idOrder, // todo: не используется
+            'opinion'  => $opinion,
+            'rule'     => $rule
         ));
+
         return $this->display(__FILE__, 'displayAdminOrder.tpl');
     }
 
@@ -97,19 +133,25 @@ class DnYaMarketOpinions extends Module
 
         $languages = Language::getLanguages();
         foreach ($languages as $lang)
-            $tab->name[$lang['id_lang']] = $this->l($tab_name);
+            $tab->name[$lang['id_lang']] = $this->l($tab_name); // todo: должен передаваться title, а не системное наименовение таба
 
         return $tab->save();
     }
 
+    /**
+     * @param string $tab_class
+     *
+     * @return bool
+     */
     private function uninstallModuleTab($tab_class)
     {
         $idTab = Tab::getIdFromClassName($tab_class);
-        if ($idTab != 0) {
+        if ($idTab !== false) {
             $tab = new Tab($idTab);
-            $tab->delete();
-            return true;
+
+            return $tab->delete();
         }
-        return false;
+
+        return true; // Т.к. уже удален или несуществует
     }
 }
