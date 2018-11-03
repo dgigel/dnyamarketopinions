@@ -14,7 +14,7 @@
 if (!defined('_PS_VERSION_'))
     exit;
 
-include_once _PS_MODULE_DIR_ . 'dnyamarketopinions/classes/DnYaMarketOpinion.php';
+require_once _PS_MODULE_DIR_ . 'dnyamarketopinions/vendor/autoload.php';
 
 class DnYaMarketOpinions extends Module
 {
