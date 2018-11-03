@@ -6,6 +6,9 @@
  * Date: 19.10.2016
  * Time: 13:43
  */
+
+use zapalm\prestashopHelpers\helpers\ValidateHelper;
+
 class DnYaMarketOpinion extends ObjectModel
 {
     public $id_opinion;
@@ -30,18 +33,22 @@ class DnYaMarketOpinion extends ObjectModel
         return Db::getInstance()->getValue('SELECT `id_opinion` FROM `' . _DB_PREFIX_ . 'dnyamarketopinions` WHERE `id_order`=' . (int)$id_order);
     }
 
+    /**
+     * Сгенерировать код купона.
+     *
+     * @return string
+     *
+     * @author Daniel Gigel <daniel@gigel.ru>
+     * @author Maksim T. <zapalm@yandex.com>
+     */
     public static function generateVoucherCode()
     {
-        // todo: чем не подходит Tools::passwdGen() ?
-        $code = 'YA';
-        $symbols = array_merge(range('A', 'Z'), range(0, 9));
-        for ($i = 0; $i <= 6; $i++) {
-            $code .= $symbols[rand(0, (count($symbols) - 1))];
-        }
+        $code = Tools::strtoupper('YA' . Tools::passwdGen(7));
 
-        // Если вдруг такой код уже есть, генерируем заново
-        if (CartRule::getIdByCode($code))
-            $code = DnYaMarketOpinion::generateVoucherCode();
+        // Если вдруг такой код уже есть, то генерируем заново
+        if (ValidateHelper::isId(CartRule::getIdByCode($code))) {
+            $code = static::generateVoucherCode();
+        }
 
         return $code;
     }
