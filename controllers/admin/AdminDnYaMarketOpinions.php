@@ -42,8 +42,8 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                         '{firstname}' => $customer->firstname
                     );
 
-                    @Mail::send(
-                        Configuration::get('PS_LANG_DEFAULT'), //id_lang
+                    $sent = (int)Mail::send(
+                        Language::getIdByIso('RU'), //id_lang
                         'thanks', //template
                         'Дарим бонус за отзыв на ЯндексМаркет', //subject
                         $mailVars, //template_vars
@@ -54,7 +54,14 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                         null, //file_attachment
                         null, //mode smtp
                         _PS_MODULE_DIR_ . 'dnyamarketopinions/mails/' //template path
-                    ); // todo: нет проверки возвращаемого значения; ухо часто - зло
+                    );
+
+                    if (0 === $sent) {
+                        exit(json_encode([
+                            'result' => 'error',
+                            'error'  => 'E-mail не отправлен.',
+                        ]));
+                    }
                 }
             }
 
@@ -122,8 +129,8 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                             '{code}' => $rule->code
                         );
 
-                        @Mail::send(
-                            Configuration::get('PS_LANG_DEFAULT'), //id_lang
+                        $sent = (int)Mail::send(
+                            Language::getIdByIso('RU'), //id_lang
                             'promokod', //template
                             'Скидочный купон', //subject
                             $mailVars, //template_vars
@@ -134,8 +141,14 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                             null, //file_attachment
                             null, //mode smtp
                             _PS_MODULE_DIR_ . 'dnyamarketopinions/mails/' //template path
-                        ); // todo: нет проверки возвращаемого значения; ухо часто - зло
+                        );
 
+                        if (0 === $sent) {
+                            exit(json_encode([
+                                'result' => 'error',
+                                'error'  => 'E-mail не отправлен.',
+                            ]));
+                        }
                     }
                 }
 
