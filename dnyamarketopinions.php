@@ -116,7 +116,6 @@ class DnYaMarketOpinions extends Module
         }
 
         $this->smarty->assign(array(
-            'id_order' => $idOrder, // todo: не используется
             'opinion'  => $opinion,
             'rule'     => $rule
         ));
