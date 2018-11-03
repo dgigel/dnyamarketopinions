@@ -56,7 +56,7 @@ class DnYaMarketOpinions extends Module
             return false;
         }
 
-        if (!$this->installModuleTab('AdminDnYaMarketOpinions', 'AdminDnYaMarketOpinions', -1)) { // todo: вторым параметром должен передаваться title, а не системное наименовение таба
+        if (false === $this->installTabs()) {
             return false;
         }
 
@@ -75,7 +75,7 @@ class DnYaMarketOpinions extends Module
             return false;
         }
 
-        if (!$this->uninstallModuleTab('AdminDnYaMarketOpinions')) {
+        if (false === \zapalm\prestashopHelpers\helpers\ModuleHelper::uninstallTabs($this->name)) {
             return false;
         }
 
@@ -94,6 +94,27 @@ class DnYaMarketOpinions extends Module
 				var tokenDnYaMarketOpinions = "' . Tools::getAdminTokenLite('AdminDnYaMarketOpinions') . '";
 			</script>
 			<script type="text/javascript" src="' . ($this->_path) . 'js/dnyamarketopinions.js"></script>';
+    }
+
+    /**
+     * Установить табы.
+     *
+     * @return bool
+     *
+     * @author Maksim T. <zapalm@yandex.com>
+     */
+    public function installTabs() {
+        $tab = \zapalm\prestashopHelpers\helpers\BackendHelper::installTab(
+            $this->name,
+            'AdminDnYaMarketOpinions',
+            \zapalm\prestashopHelpers\helpers\BackendHelper::TAB_PARENT_ID_UNLINKED
+        );
+
+        if (false === \zapalm\prestashopHelpers\helpers\ValidateHelper::isLoadedObject($tab)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -121,36 +142,5 @@ class DnYaMarketOpinions extends Module
         ));
 
         return $this->display(__FILE__, 'displayAdminOrder.tpl');
-    }
-
-    private function installModuleTab($tab_class, $tab_name, $id_tab_parent)
-    {
-        $tab = new Tab();
-        $tab->class_name = $tab_class;
-        $tab->module = $this->name;
-        $tab->id_parent = $id_tab_parent;
-
-        $languages = Language::getLanguages();
-        foreach ($languages as $lang)
-            $tab->name[$lang['id_lang']] = $this->l($tab_name); // todo: должен передаваться title, а не системное наименовение таба
-
-        return $tab->save();
-    }
-
-    /**
-     * @param string $tab_class
-     *
-     * @return bool
-     */
-    private function uninstallModuleTab($tab_class)
-    {
-        $idTab = Tab::getIdFromClassName($tab_class);
-        if ($idTab !== false) {
-            $tab = new Tab($idTab);
-
-            return $tab->delete();
-        }
-
-        return true; // Т.к. уже удален или несуществует
     }
 }
