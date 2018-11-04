@@ -1,14 +1,13 @@
 <?php
 /**
- * DnYaMarketOpinions: PrestaShop module main file.
+ * DnYaMarketOpinion: модуль для PrestaShop.
  *
- * @author Daniel Gigel <daniel@gigel.ru>
- * @author zapalm <zapalm@ya.ru>
- *
- * @link   http://Daniel.Gigel.ru/
- *
- * Date: 19.10.2016
- * Time: 13:41
+ * @author    Daniel Gigel <daniel@gigel.ru>
+ * @author    Maksim T. <zapalm@yandex.com>
+ * @copyright 2016
+ * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://Daniel.Gigel.ru/
+ * @link      https://prestashop.modulez.ru/en/ Модули для PrestaShop CMS
  */
 
 if (!defined('_PS_VERSION_'))
