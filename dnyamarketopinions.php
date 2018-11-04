@@ -21,7 +21,7 @@ class DnYaMarketOpinions extends Module
     {
         $this->name = 'dnyamarketopinions';
         $this->tab = 'emailing';
-        $this->version = '0.1';
+        $this->version = '0.2.0';
         $this->author = 'Daniel.Gigel.ru';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.5.0.0', 'max' => '1.5.6.3');
