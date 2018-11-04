@@ -61,7 +61,8 @@ class DnYaMarketOpinions extends Module
         }
 
         return $this->registerHook('displayAdminOrder')
-            && $this->registerHook('BackOfficeHeader')
+            && $this->registerHook('displayBackOfficeFooter')
+            && $this->registerHook('actionAdminControllerSetMedia')
         ;
     }
 
@@ -82,18 +83,31 @@ class DnYaMarketOpinions extends Module
         return parent::uninstall();
     }
 
-    public function hookDisplayBackOfficeHeader()
+    /**
+     * @inheritdoc
+     *
+     * @author Maksim T. <zapalm@yandex.com>
+     */
+    public function hookActionAdminControllerSetMedia()
     {
-        //хз почему его добавляет перед jquery
-        //$this->context->controller->addJS(($this->_path) . 'js/dnyamarketopinions.js');
-        //todo: попробовать сделать вызов до собственных js: $this->context->controller->addJquery();
+        $this->context->controller->addJquery();
+        $this->context->controller->addJS($this->_path . 'js/dnyamarketopinions.js');
+    }
 
+    /**
+     * @inheritdoc
+     *
+     * @author Daniel Gigel <daniel@gigel.ru>
+     * @author Maksim T. <zapalm@yandex.com>
+     */
+    public function hookDisplayBackOfficeFooter()
+    {
         return '
-			<script type="text/javascript">
-				var urlDnYaMarketOpinions = "' . $this->context->link->getAdminLink('AdminDnYaMarketOpinions') . '";
-				var tokenDnYaMarketOpinions = "' . Tools::getAdminTokenLite('AdminDnYaMarketOpinions') . '";
-			</script>
-			<script type="text/javascript" src="' . ($this->_path) . 'js/dnyamarketopinions.js"></script>';
+            <script type="text/javascript">
+                var urlDnYaMarketOpinions = "' . $this->context->link->getAdminLink('AdminDnYaMarketOpinions') . '";
+                var tokenDnYaMarketOpinions = "' . Tools::getAdminTokenLite('AdminDnYaMarketOpinions') . '";
+            </script>
+        ';
     }
 
     /**
