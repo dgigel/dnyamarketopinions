@@ -1,3 +1,14 @@
+/**
+ * DnYaMarketOpinion: модуль для PrestaShop.
+ *
+ * @author    Daniel Gigel <daniel@gigel.ru>
+ * @author    Maksim T. <zapalm@yandex.com>
+ * @copyright 2016
+ * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://Daniel.Gigel.ru/
+ * @link      https://prestashop.modulez.ru/en/ Модули для PrestaShop CMS
+ */
+
 $(document).ready(function () {
     $('#submitAddOpinion').on('click', function (e) {
         console.log(e);

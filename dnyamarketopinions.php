@@ -1,20 +1,19 @@
 <?php
 /**
- * DnYaMarketOpinions: PrestaShop module main file.
+ * DnYaMarketOpinion: модуль для PrestaShop.
  *
- * @author Daniel Gigel <daniel@gigel.ru>
- * @author zapalm <zapalm@ya.ru>
- *
- * @link   http://Daniel.Gigel.ru/
- *
- * Date: 19.10.2016
- * Time: 13:41
+ * @author    Daniel Gigel <daniel@gigel.ru>
+ * @author    Maksim T. <zapalm@yandex.com>
+ * @copyright 2016
+ * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://Daniel.Gigel.ru/
+ * @link      https://prestashop.modulez.ru/en/ Модули для PrestaShop CMS
  */
 
 if (!defined('_PS_VERSION_'))
     exit;
 
-include_once _PS_MODULE_DIR_ . 'dnyamarketopinions/classes/DnYaMarketOpinion.php';
+require_once _PS_MODULE_DIR_ . 'dnyamarketopinions/vendor/autoload.php';
 
 class DnYaMarketOpinions extends Module
 {
@@ -22,10 +21,10 @@ class DnYaMarketOpinions extends Module
     {
         $this->name = 'dnyamarketopinions';
         $this->tab = 'emailing';
-        $this->version = '0.1';
+        $this->version = '0.2.0';
         $this->author = 'Daniel.Gigel.ru';
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.6');
+        $this->ps_versions_compliancy = array('min' => '1.5.0.0', 'max' => '1.5.6.3');
         $this->secure_key = Tools::encrypt($this->name);
 
         parent::__construct();
@@ -56,12 +55,13 @@ class DnYaMarketOpinions extends Module
             return false;
         }
 
-        if (!$this->installModuleTab('AdminDnYaMarketOpinions', 'AdminDnYaMarketOpinions', -1)) { // todo: вторым параметром должен передаваться title, а не системное наименовение таба
+        if (false === $this->installTabs()) {
             return false;
         }
 
         return $this->registerHook('displayAdminOrder')
-            && $this->registerHook('BackOfficeHeader')
+            && $this->registerHook('displayBackOfficeFooter')
+            && $this->registerHook('actionAdminControllerSetMedia')
         ;
     }
 
@@ -75,25 +75,59 @@ class DnYaMarketOpinions extends Module
             return false;
         }
 
-        if (!$this->uninstallModuleTab('AdminDnYaMarketOpinions')) {
+        if (false === \zapalm\prestashopHelpers\helpers\ModuleHelper::uninstallTabs($this->name)) {
             return false;
         }
 
         return parent::uninstall();
     }
 
-    public function hookDisplayBackOfficeHeader()
+    /**
+     * @inheritdoc
+     *
+     * @author Maksim T. <zapalm@yandex.com>
+     */
+    public function hookActionAdminControllerSetMedia()
     {
-        //хз почему его добавляет перед jquery
-        //$this->context->controller->addJS(($this->_path) . 'js/dnyamarketopinions.js');
-        //todo: попробовать сделать вызов до собственных js: $this->context->controller->addJquery();
+        $this->context->controller->addJquery();
+        $this->context->controller->addJS($this->_path . 'js/dnyamarketopinions.js');
+    }
 
+    /**
+     * @inheritdoc
+     *
+     * @author Daniel Gigel <daniel@gigel.ru>
+     * @author Maksim T. <zapalm@yandex.com>
+     */
+    public function hookDisplayBackOfficeFooter()
+    {
         return '
-			<script type="text/javascript">
-				var urlDnYaMarketOpinions = "' . $this->context->link->getAdminLink('AdminDnYaMarketOpinions') . '";
-				var tokenDnYaMarketOpinions = "' . Tools::getAdminTokenLite('AdminDnYaMarketOpinions') . '";
-			</script>
-			<script type="text/javascript" src="' . ($this->_path) . 'js/dnyamarketopinions.js"></script>';
+            <script type="text/javascript">
+                var urlDnYaMarketOpinions = "' . $this->context->link->getAdminLink('AdminDnYaMarketOpinions') . '";
+                var tokenDnYaMarketOpinions = "' . Tools::getAdminTokenLite('AdminDnYaMarketOpinions') . '";
+            </script>
+        ';
+    }
+
+    /**
+     * Установить табы.
+     *
+     * @return bool
+     *
+     * @author Maksim T. <zapalm@yandex.com>
+     */
+    public function installTabs() {
+        $tab = \zapalm\prestashopHelpers\helpers\BackendHelper::installTab(
+            $this->name,
+            'AdminDnYaMarketOpinions',
+            \zapalm\prestashopHelpers\helpers\BackendHelper::TAB_PARENT_ID_UNLINKED
+        );
+
+        if (false === \zapalm\prestashopHelpers\helpers\ValidateHelper::isLoadedObject($tab)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -116,42 +150,10 @@ class DnYaMarketOpinions extends Module
         }
 
         $this->smarty->assign(array(
-            'id_order' => $idOrder, // todo: не используется
             'opinion'  => $opinion,
             'rule'     => $rule
         ));
 
         return $this->display(__FILE__, 'displayAdminOrder.tpl');
-    }
-
-    private function installModuleTab($tab_class, $tab_name, $id_tab_parent)
-    {
-        $tab = new Tab();
-        $tab->class_name = $tab_class;
-        $tab->module = $this->name;
-        $tab->id_parent = $id_tab_parent;
-
-        $languages = Language::getLanguages();
-        foreach ($languages as $lang)
-            $tab->name[$lang['id_lang']] = $this->l($tab_name); // todo: должен передаваться title, а не системное наименовение таба
-
-        return $tab->save();
-    }
-
-    /**
-     * @param string $tab_class
-     *
-     * @return bool
-     */
-    private function uninstallModuleTab($tab_class)
-    {
-        $idTab = Tab::getIdFromClassName($tab_class);
-        if ($idTab !== false) {
-            $tab = new Tab($idTab);
-
-            return $tab->delete();
-        }
-
-        return true; // Т.к. уже удален или несуществует
     }
 }

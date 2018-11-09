@@ -1,24 +1,31 @@
 <?php
-
 /**
- * @author Daniel Gigel <daniel@gigel.ru>
- * @link http://Daniel.Gigel.ru/
- * Date: 19.10.2016
- * Time: 16:35
+ * DnYaMarketOpinion: модуль для PrestaShop.
+ *
+ * @author    Daniel Gigel <daniel@gigel.ru>
+ * @author    Maksim T. <zapalm@yandex.com>
+ * @copyright 2016
+ * @license   https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://Daniel.Gigel.ru/
+ * @link      https://prestashop.modulez.ru/en/ Модули для PrestaShop CMS
  */
+
+use zapalm\prestashopHelpers\helpers\ValidateHelper;
+
 class AdminDnYaMarketOpinionsController extends ModuleAdminController
 {
     public function ajaxProcessAddOpinion()
     {
-        if ($id_order = Tools::getValue('id_order')) { //todo: если id_order не задан, то вернет пусто, хотя ожидается ajax-ответ
+        $order = new Order((int)Tools::getValue('id_order'));
+
+        if (ValidateHelper::isLoadedObject($order)) {
             $opinion = new DnYaMarketOpinion();
-            $opinion->id_order = (int)$id_order;
+            $opinion->id_order = $order->id;
             $opinion->opinion_sent = 1;
 
-            $order = new Order((int)$id_order);
             $customer = new Customer($order->id_customer);
 
-            if (DnYaMarketOpinion::checkOpinion((int)$id_order)) {
+            if (DnYaMarketOpinion::checkOpinion($order->id)) {
                 die(Tools::jsonEncode(array(
                     'result' => 'error',
                     'error' => Tools::displayError('Просьба уже была отправлена.')
@@ -34,12 +41,12 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                 if (Validate::isLoadedObject($customer) && Validate::isLoadedObject($order)) {
 
                     $mailVars = array(
-                        '{id_order}' => (int)$id_order,
+                        '{id_order}'  => (int)$order->id,
                         '{firstname}' => $customer->firstname
                     );
 
-                    @Mail::send(
-                        Configuration::get('PS_LANG_DEFAULT'), //id_lang
+                    $sent = (int)Mail::send(
+                        Language::getIdByIso('RU'), //id_lang
                         'thanks', //template
                         'Дарим бонус за отзыв на ЯндексМаркет', //subject
                         $mailVars, //template_vars
@@ -50,7 +57,14 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                         null, //file_attachment
                         null, //mode smtp
                         _PS_MODULE_DIR_ . 'dnyamarketopinions/mails/' //template path
-                    ); // todo: нет проверки возвращаемого значения; ухо часто - зло
+                    );
+
+                    if (0 === $sent) {
+                        exit(json_encode([
+                            'result' => 'error',
+                            'error'  => 'E-mail не отправлен.',
+                        ]));
+                    }
                 }
             }
 
@@ -58,12 +72,19 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                 'result' => 'ok'
             )));
         }
+
+        exit(json_encode([
+            'result' => 'error',
+            'error'  => 'Не указан ID заказа.',
+        ]));
     }
 
     public function ajaxProcessAddRule()
     {
-        if ($id_order = Tools::getValue('id_order')) { //todo: если id_order не задан, то вернет пусто, хотя ожидается ajax-ответ
-            $id_opinion = DnYaMarketOpinion::checkOpinion((int)$id_order);
+        $order = new Order((int)Tools::getValue('id_order'));
+
+        if (ValidateHelper::isLoadedObject($order)) {
+            $id_opinion = DnYaMarketOpinion::checkOpinion($order->id);
 
             if ($id_opinion) {
                 $opinion = new DnYaMarketOpinion($id_opinion);
@@ -86,7 +107,6 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                 $rule->highlight = 0;
                 $rule->active = 1;
 
-                $order = new Order((int)$id_order); // todo: проверка, что заказ реально существует должна быть проделана заранее
                 $customer = new Customer($order->id_customer);
 
                 if (!$rule->add()) {
@@ -107,13 +127,13 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                     if (Validate::isLoadedObject($customer) && Validate::isLoadedObject($order)) {
 
                         $mailVars = array(
-                            '{id_order}' => (int)$id_order,
+                            '{id_order}' => (int)$order->id,
                             '{firstname}' => $customer->firstname,
                             '{code}' => $rule->code
                         );
 
-                        @Mail::send(
-                            Configuration::get('PS_LANG_DEFAULT'), //id_lang
+                        $sent = (int)Mail::send(
+                            Language::getIdByIso('RU'), //id_lang
                             'promokod', //template
                             'Скидочный купон', //subject
                             $mailVars, //template_vars
@@ -124,8 +144,14 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                             null, //file_attachment
                             null, //mode smtp
                             _PS_MODULE_DIR_ . 'dnyamarketopinions/mails/' //template path
-                        ); // todo: нет проверки возвращаемого значения; ухо часто - зло
+                        );
 
+                        if (0 === $sent) {
+                            exit(json_encode([
+                                'result' => 'error',
+                                'error'  => 'E-mail не отправлен.',
+                            ]));
+                        }
                     }
                 }
 
@@ -140,5 +166,10 @@ class AdminDnYaMarketOpinionsController extends ModuleAdminController
                 )));
             }
         }
+
+        exit(json_encode([
+            'result' => 'error',
+            'error'  => 'Не указан ID заказа.',
+        ]));
     }
 }

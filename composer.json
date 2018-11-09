@@ -1,0 +1,31 @@
+{
+  "name": "dgigel/dnyamarketopinions",
+  "type": "prestashop-module",
+  "homepage": "https://prestashop.modulez.ru",
+  "authors": [
+    {
+      "name": "Maksim T.",
+      "email": "zapalm@yandex.com"
+    },
+    {
+      "name": "Daniel Gigel",
+      "email": "daniel@gigel.ru"
+    }
+  ],
+  "require": {
+    "php": ">=5.5",
+    "zapalm/prestashopHelpers": "dev-master"
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/zapalm/prestashopHelpers"
+    }
+  ],
+  "autoload": {
+    "classmap": ["classes/"]
+  },
+  "config": {
+    "preferred-install": "dist"
+  }
+}
